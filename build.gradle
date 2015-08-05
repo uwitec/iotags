@@ -7,8 +7,18 @@
  * user guide available at http://gradle.org/docs/2.4/userguide/tutorial_java_projects.html
  */
 
+// Apply the metamodel JPA generator
+plugins {
+  id "at.comm_unity.gradle.plugins.jpamodelgen" version "1.1.0"
+}
+
 // Apply the java plugin to add support for Java
 apply plugin: 'java'
+
+
+
+
+
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -16,6 +26,8 @@ repositories {
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
 }
+
+
 
 // In this section you declare the dependencies for your production and test code
 dependencies {

@@ -7,3 +7,7 @@ build/*
 .gradle/*
 **/*~
 **/*.swp
+/bin/
+/metamodel/
+/.apt_generated/
+src/jpaModelgen

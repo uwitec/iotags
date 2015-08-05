@@ -11,7 +11,6 @@ import java.util.List;
  * 
  */
 @Entity
-@Table(name="session")
 @NamedQuery(name="Session.findAll", query="SELECT s FROM Session s")
 public class Session implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -28,13 +27,13 @@ public class Session implements Serializable {
 
 	private String name;
 
-	//bi-directional many-to-many association to User
-	@ManyToMany(mappedBy="sessions")
-	private List<User> users;
-
 	//bi-directional many-to-one association to Tag
 	@OneToMany(mappedBy="session")
 	private List<Tag> tags;
+
+	//bi-directional many-to-many association to User
+	@ManyToMany(mappedBy="sessions")
+	private List<User> users;
 
 	public Session() {
 	}
@@ -71,14 +70,6 @@ public class Session implements Serializable {
 		this.name = name;
 	}
 
-	public List<User> getUsers() {
-		return this.users;
-	}
-
-	public void setUsers(List<User> users) {
-		this.users = users;
-	}
-
 	public List<Tag> getTags() {
 		return this.tags;
 	}
@@ -99,6 +90,14 @@ public class Session implements Serializable {
 		tag.setSession(null);
 
 		return tag;
+	}
+
+	public List<User> getUsers() {
+		return this.users;
+	}
+
+	public void setUsers(List<User> users) {
+		this.users = users;
 	}
 
 }
