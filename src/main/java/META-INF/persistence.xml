@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
+	<persistence-unit name="iotags">
+		<description>
+			IOTags JPA configuration. 
+		</description>
+		<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+		<class>com.molavec.iotags.entities.AnalogData</class>
+		<class>com.molavec.iotags.entities.AnalogDataPK</class>
+		<class>com.molavec.iotags.entities.DigitalData</class>
+		<class>com.molavec.iotags.entities.DigitalDataPK</class>
+		<class>com.molavec.iotags.entities.Session</class>
+		<class>com.molavec.iotags.entities.Tag</class>
+		<class>com.molavec.iotags.entities.User</class>
+		<!-- <mapping-file>META-INF/mappingFile.xml</mapping-file> -->
+		<!-- <jar-file>packedEntity.jar</jar-file> -->
+		<!-- <class>sample.MyEntity1</class> -->
+		<properties>
+			<property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/jpa_test" />
+			<property name="javax.persistence.jdbc.user" value="jpa_user" />
+			<property name="javax.persistence.jdbc.password" value="jpa_pass" />
+			
+			<!-- EclipseLink should create the database schema automatically -->
+  			<!-- 
+      		<property name="eclipselink.ddl-generation" value="drop-and-create-tables" />
+      		<property name="eclipselink.ddl-generation.output-mode" value="both" />
+  			-->
+		</properties>
+	</persistence-unit>
+</persistence>
