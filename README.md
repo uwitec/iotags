@@ -1,5 +1,5 @@
 #IO Tags Server
-Input Output Tags Service. Generic service to kick off a SCADA system.
+Input Output Tags Service. Generic service to kick off a [SCADA](https://en.wikipedia.org/wiki/SCADA) system.
 
 ##Motivation
 Develop a "standarized" service to interconnect **[IoT](https://en.wikipedia.org/wiki/Internet_of_Things) Standards Communication Protocols**, **Persist** and **Present** Layers. This project is inspired in how works proxies used by commercials HMIs (OPC Server for example), but as cloud server.
@@ -25,14 +25,14 @@ Layer dedicated to persist data. Here are some options:
  + PouchDB (for mobile)??
  + CouchDB or MongoDB (forCloud)??
 
- **File (not ready)**:
- Some Apache CSV or ODS implementation??
+**File (not ready)**:
+ + Some Apache CSV or ODS implementation??
 
 ###Tag Configuration
 Layer consist in configure different remote points (Sensors, AI, AO, DI, DO), Tags user privileges and Tag Communication Protocol.
 
-##IoT Communication Protocols
-Layer that **uses owner and third party Standard Protocols to communicate with Remote Terminal Units and HMI systems** [RTU](https://en.wikipedia.org/wiki/Remote_Terminal_Unit). My contribution is to try simplify integration with implementations of many people that collaborate to make easier and happier to other the communicate with electronic things. Some protocols integrated are:
+###IoT Communication Protocols
+Layer that **uses owner and third party Standard Protocols to communicate with [RTUs](https://en.wikipedia.org/wiki/Remote_Terminal_Unit) and [HMI](https://en.wikipedia.org/wiki/Human%E2%80%93machine_interface) systems**. My contribution is to try simplify integration with implementations of many people that collaborate to make easier and happier to other the communicate with electronic things. Some protocols integrated are:
 
  + MODBUS (not integrated yet)
  + DCON (not integrated yet)
@@ -58,9 +58,10 @@ The next are some tips to setup it and get work it:
 	  <property name="eclipselink.ddl-generation" value="drop-and-create-tables" />
     <property name="eclipselink.ddl-generation.output-mode" value="both" />
 
-## MYSQL Tune Up:
+#### MYSQL Tune Up:
 Add **View Object** to Join **session** data:
 
+    (not implemented yet)
 
 ###2.- Configure Tags
 (Not implemented yet)
