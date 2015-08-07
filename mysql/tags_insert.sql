@@ -1,4 +1,4 @@
-use daq_db;
+use iotags;
 
 #INSERTS
 Insert into tag (id, name, data_type, protocol)  values (1, 'nodo1', 'AI', 'MODBUS');

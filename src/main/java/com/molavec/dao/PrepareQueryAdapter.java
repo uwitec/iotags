@@ -1,4 +1,4 @@
-package com.molavec.jpa.dao;
+package com.molavec.dao;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Order;

@@ -1,40 +1,24 @@
 package com.molavec.iotags.queries;
 
-import java.util.List;
-
 import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.molavec.dao.EntityDaoCriteria;
 import com.molavec.iotags.entities.Session;
 
-public class SessionQuery {
-	protected EntityManager em;
-
-	public SessionQuery(EntityManager em) {
-		this.em = em;
+/**
+ * Implements queries for Session.
+ * 
+ * @author molavec
+ *
+ */
+public class SessionQuery extends EntityDaoCriteria<Session, Integer> {
+	
+	public SessionQuery(EntityManager em){
+		super(Session.class, em);
 	}
-
-	public Session createSession(String name) {
-		Session session = new Session();
-		session.setName(name);
-		em.persist(session);
-		return session;
-	}
-
-	public void removeSession(int id) {
-		Session session = findSession(id);
-		if (session != null) {
-			em.remove(session);
-		}
-	}
-
-	public Session findSession(int id) {
-		return em.find(Session.class, id);
-	}
-
-	public List<Session> findAllSessions() {
-		TypedQuery<Session> query = em.createQuery("SELECT e FROM Session e",
-				Session.class);
-		return query.getResultList();
-	}
+	
+	static Logger log = LoggerFactory.getLogger(SessionQuery.class);
 }

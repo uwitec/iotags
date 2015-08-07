@@ -1,4 +1,4 @@
-package com.molavec.jpa.dao.exception;
+package com.molavec.iotags.dao.exception;
 
 @SuppressWarnings("serial")
 public class QueryException extends Exception{

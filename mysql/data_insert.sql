@@ -1,4 +1,4 @@
-use daq_db;
+use iotags;
 
 #INSERTS ANALOG DATA
 Insert into analog_data (time, value, tag)  values (20140506, 11.01, 1);

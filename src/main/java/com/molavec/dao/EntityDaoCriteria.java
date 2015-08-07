@@ -1,13 +1,10 @@
-package com.molavec.jpa.dao;
+package com.molavec.dao;
 
 import java.io.Serializable;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.TypedQuery;
@@ -18,70 +15,57 @@ import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-
-
-
-
-
-
-import com.molavec.jpa.dao.exception.QueryException;
-import com.molavec.jpa.dao.exception.QueryExceptionKind;
-import com.molavec.jpa.dao.server.PersistenceUnitFactory;
-
-
-
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.molavec.iotags.dao.exception.QueryException;
+import com.molavec.iotags.dao.exception.QueryExceptionKind;
+import com.molavec.iotags.persistenceUnit.IOTagsPersistenceUnitFactory;
 
+/**
+ * Implements EntityDao using CriteriaQuery to construct queries.
+ * @author angel
+ *
+ * @param <T> Type of class
+ * @param <PK> type of primary key
+ */
 public class EntityDaoCriteria<T,PK extends Serializable> implements EntityDao<T, PK>{
 	static Logger log = LoggerFactory.getLogger(EntityDaoCriteria.class);
 	private Class<T> tclass ;
+	private EntityManager em;
 	
-	public EntityDaoCriteria(Class<T> tclass) throws ClassCastException{
+	public EntityDaoCriteria(Class<T> tclass, EntityManager em) throws ClassCastException{
 		this.tclass = tclass;
+		this.em = em;
 	}
 
 	public void save(T entity) throws QueryException{
-		EntityManager entityManager = getEntityManager();
 		try {
-			EntityTransaction entityTransaction = 
-					entityManager.getTransaction();
-			
-			entityTransaction.begin();
-			entityManager.persist(entity);
-			entityTransaction.commit();
-			
+			em.persist(entity);
 		} catch (Exception e) {
 			throw new QueryException(e.getMessage(), e);
-		} finally {
-			entityManager.close();
-		}
+		} 
 	}
 
+	//TODO: ver como se comporta esta clase realmente. Pobrar Mockito y PowerMock sean lo que sean.
 	@Override
 	public T attach(T entity) throws QueryException {
-		EntityManager entityManager = getEntityManager();
 		try {
-			entityManager.getTransaction().begin();
-			entityManager.persist(entity);
-			entityManager.flush();
-			entityManager.refresh(entity);
+			em.persist(entity);
+			em.flush();
+			em.refresh(entity);
 			return entity;
 		} catch (Exception e) {
 			throw new QueryException(e.getMessage(), e);
-		} finally {
-			entityManager.close();
 		}
 	}
 
 	@Override
 	public T get(PK id) throws QueryException {
-		EntityManager entityManager = getEntityManager();
+		
 		try {
 			
-			T entity = entityManager.find(tclass,id);
+			T entity = em.find(tclass,id);
 			if(entity != null){
 				return entity;	
 			}else{
@@ -101,15 +85,12 @@ public class EntityDaoCriteria<T,PK extends Serializable> implements EntityDao<T
 //		    PessimisticLockException - if pessimistic locking fails and the transaction is rolled back 
 //		    LockTimeoutException - if pessimistic locking fails and only the statement is rolled back 
 //		    PersistenceException - if the query execution exceeds the query timeout value set and the transaction is rolled back
-		 finally {
-			entityManager.close();
-		}
+		 
 	}
 
 	public T get(PrepareQuery<T> prepareQuery) throws QueryException{
-		EntityManager entityManager = getEntityManager();
 		try {
-			CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+			CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
 			CriteriaQuery<T> criteriaQuery = criteriaBuilder.createQuery(tclass);
 			Root<T> root = criteriaQuery.from(tclass);
 			Predicate predicate = prepareQuery.getPredicate(root, criteriaBuilder);
@@ -120,7 +101,7 @@ public class EntityDaoCriteria<T,PK extends Serializable> implements EntityDao<T
 			if(orderArray != null){
 				criteriaQuery.orderBy(orderArray);
 			}
-			TypedQuery<T> query = entityManager.createQuery(criteriaQuery);
+			TypedQuery<T> query = em.createQuery(criteriaQuery);
 			return query.getSingleResult();
 		} catch (NoResultException e) {
 			String msg = String.format("Can't  find in database: %s", tclass.getName());
@@ -130,58 +111,16 @@ public class EntityDaoCriteria<T,PK extends Serializable> implements EntityDao<T
 			throw new QueryException(QueryExceptionKind.NON_UNIQUE_RESULT, msg);
 		} catch (Exception e) {
 			throw new QueryException("Error trying to get: " + tclass.getName());
-		} finally {
-			entityManager.close();
-		}
+		} 
 	}
 
-	public T update(T entity) throws QueryException{
-		log.info("=)otro update");
-		EntityManager entityManager = getEntityManager();
-		try{
-			entityManager.getTransaction().begin();
-			T entityCommited = entityManager.merge(entity);
-			entityManager.getTransaction().commit();
-			log.info("UPDATE USER <------------------");
-			return entityCommited;  
-		} catch (NoResultException e) {
-			String msg = String.format("Can't  find in database: %s", tclass.getName());
-			throw new QueryException(QueryExceptionKind.NO_RESULT, msg);
-		} catch (Exception e) {
-			throw new QueryException("Error trying to get: " + tclass.getName());
-		} finally{
-			entityManager.close();
-		}
-	}
-	
-	@Override
-	public void delete(T entity) throws QueryException {
-		EntityManager entityManager = getEntityManager();
-		try{
-			entityManager.getTransaction().begin();
-			T entityAttached = entityManager.merge(entity);
-			entityManager.remove(entityAttached);
-			entityManager.getTransaction().commit();
-		} catch (NoResultException e) {
-			String msg = String.format("Can't  find in database: %s", tclass.getName());
-			throw new QueryException(QueryExceptionKind.NO_RESULT, msg);
-		} catch (Exception e) {
-			throw new QueryException("Error trying to get: " + tclass.getName());
-		}  finally{
-			entityManager.close();
-		}
-		
-	}
 
 	@Override
-	public void deleteByPK(PK id) throws QueryException {
-		EntityManager entityManager = getEntityManager();
+	public void delete(PK id) throws QueryException {
 		try {
-			T entity = entityManager.find(tclass,id);
+			T entity = em.find(tclass,id);
 			if(entity != null){
-				entityManager.getTransaction().begin();
-				entityManager.remove(entity);
-				entityManager.getTransaction().commit();	
+				em.remove(entity);
 			}else{
 				String msg = String.format("Can't  find in database: %s", tclass.getName());
 				throw new QueryException(QueryExceptionKind.NO_RESULT, msg);
@@ -191,14 +130,18 @@ public class EntityDaoCriteria<T,PK extends Serializable> implements EntityDao<T
 		} catch (IllegalArgumentException e) {
 			throw new QueryException("Error trying to get: " + tclass.getName());
 		}	 finally{
-			entityManager.close();
+			em.close();
 		}
 	}
 	
 	@Override
 	public void deleteAll() throws QueryException {
 		for(T t: this.find()){
-			this.delete(t);
+			try{
+				em.remove(t);
+			}catch(Exception e){
+				throw new QueryException("Error removing entity: " + t);
+			}
 		}
 		
 	}
@@ -211,9 +154,8 @@ public class EntityDaoCriteria<T,PK extends Serializable> implements EntityDao<T
 	
 	@Override
 	public List<T> find(PrepareQuery<T> prepareQuery) throws QueryException {
-		EntityManager entityManager = getEntityManager();
 		try {
-			CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+			CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
 			CriteriaQuery<T> criteriaQuery = criteriaBuilder.createQuery(tclass);
 			Root<T> root = criteriaQuery.from(tclass);
 			
@@ -223,12 +165,10 @@ public class EntityDaoCriteria<T,PK extends Serializable> implements EntityDao<T
 				Predicate predicate = prepareQuery.getPredicate(root, criteriaBuilder);
 				criteriaQuery.where(predicate);
 			}
-			TypedQuery<T> query = entityManager.createQuery(criteriaQuery);
+			TypedQuery<T> query = em.createQuery(criteriaQuery);
 			return query.getResultList();
 		}  catch (Exception e) {
 			throw new QueryException("Error trying to get: " + tclass.getName(), e);
-		}	 finally {
-			entityManager.close();
 		}
 	}
 
@@ -239,9 +179,8 @@ public class EntityDaoCriteria<T,PK extends Serializable> implements EntityDao<T
 	}
 	@Override
 	public List<T> find(int page, int pageSize,PrepareQuery<T> prepareQuery) throws QueryException {
-		EntityManager entityManager = getEntityManager();
 		try {
-			CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+			CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
 			CriteriaQuery<T> criteriaQuery = criteriaBuilder.createQuery(tclass);
 			Root<T> root = criteriaQuery.from(tclass);
 			
@@ -251,7 +190,7 @@ public class EntityDaoCriteria<T,PK extends Serializable> implements EntityDao<T
 				Predicate predicate = prepareQuery.getPredicate(root, criteriaBuilder);
 				criteriaQuery.where(predicate);
 			}
-			TypedQuery<T> query = entityManager.createQuery(criteriaQuery);
+			TypedQuery<T> query = em.createQuery(criteriaQuery);
 			query.setFirstResult(page*pageSize);
 			query.setMaxResults(pageSize);
 
@@ -264,9 +203,7 @@ public class EntityDaoCriteria<T,PK extends Serializable> implements EntityDao<T
 //		    PersistenceException - if the query execution exceeds the query timeout value set and the transaction is rolled back
 		} catch (Exception e) {
 			throw new QueryException("Error trying to get: " + tclass.getName());
-		}	 finally {
-			entityManager.close();
-		}
+		}	
 	}
 	@Override
 	public long count() throws QueryException {
@@ -277,9 +214,8 @@ public class EntityDaoCriteria<T,PK extends Serializable> implements EntityDao<T
 	
 	@Override
 	public long count(PrepareQuery<T> prepareQuery) throws QueryException {
-		EntityManager entityManager = getEntityManager();
 		try {
-			CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+			CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
 			CriteriaQuery<T> criteriaQuery = criteriaBuilder.createQuery(tclass);
 			Root<T> root = criteriaQuery.from(tclass);
 			Expression<Long> expression = criteriaBuilder.count(root);
@@ -289,20 +225,21 @@ public class EntityDaoCriteria<T,PK extends Serializable> implements EntityDao<T
 				Predicate predicate = prepareQuery.getPredicate(root, criteriaBuilder);
 				cq.where(predicate);
 			}
-			TypedQuery<Long> typedQuery = entityManager.createQuery(cq);
+			TypedQuery<Long> typedQuery = em.createQuery(cq);
 			return typedQuery.getSingleResult();
 		}catch (Exception e) {
 			throw new QueryException("Error trying to get: " + tclass.getName());
 		} finally {
-			entityManager.close();
+			em.close();
 		}
 	}
 
 
 
 	protected EntityManager getEntityManager(){
-		PersistenceUnitFactory server = PersistenceUnitFactory.getInstance();
-		EntityManagerFactory entityManagerFactory = server.getEntityManagerFactory();
+		EntityManagerFactory entityManagerFactory = IOTagsPersistenceUnitFactory
+														.getInstance()
+														.getEntityManagerFactory();
 		return entityManagerFactory.createEntityManager();
 	}
 

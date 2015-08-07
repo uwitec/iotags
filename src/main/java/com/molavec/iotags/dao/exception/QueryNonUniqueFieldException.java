@@ -1,4 +1,4 @@
-package com.molavec.jpa.dao.exception;
+package com.molavec.iotags.dao.exception;
 
 /**
  * Es arrojada cuando se intenta ingresar o actualizar un campo en  

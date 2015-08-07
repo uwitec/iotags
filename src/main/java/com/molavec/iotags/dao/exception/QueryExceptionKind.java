@@ -1,4 +1,4 @@
-package com.molavec.jpa.dao.exception;
+package com.molavec.iotags.dao.exception;
 
 public enum QueryExceptionKind {
 
